@@ -61,6 +61,7 @@ message instead of a broken/erroring chat — safe to embed before your backend 
 | `title` | `string?` | `"Chat Assistant"` | Panel header title. |
 | `placeholder` | `string?` | `"Type a message…"` | Input placeholder. |
 | `theme` | `'light' \| 'dark' \| 'auto'?` | `"auto"` | |
+| `draggable` | `boolean?` | `true` | Set `false` to keep the bubble fixed in place (Custom Element attribute: `bubble-draggable="false"`). |
 | `initialMessages` | `ChatMessage[]?` | — | Seeds the conversation if nothing is in localStorage yet. |
 | `greetingMessage` | `string?` | — | First-load greeting popup text. |
 | `greetingDelayMs` | `number?` | `1200` | Delay before the greeting appears. |

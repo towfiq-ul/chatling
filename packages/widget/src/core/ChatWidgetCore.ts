@@ -36,6 +36,7 @@ type DefaultableOptions =
   | 'title'
   | 'placeholder'
   | 'theme'
+  | 'draggable'
   | 'greetingMessage'
   | 'greetingDelayMs'
   | 'greetingCooldownMs'
@@ -45,6 +46,7 @@ const DEFAULT_OPTIONS: Required<Pick<WidgetOptions, DefaultableOptions>> = {
   title: 'Chat Assistant',
   placeholder: 'Type a message…',
   theme: 'auto',
+  draggable: true,
   greetingMessage: DEFAULT_GREETING_MESSAGE,
   greetingDelayMs: DEFAULT_GREETING_DELAY_MS,
   greetingCooldownMs: DEFAULT_GREETING_COOLDOWN_MS,
@@ -296,6 +298,7 @@ export class ChatWidgetCore {
   }
 
   onBubblePointerMove(clientX: number, clientY: number): void {
+    if (!this.options.draggable) return;
     const drag = this.dragState;
     if (!drag) return;
     const dx = clientX - drag.startX;

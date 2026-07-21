@@ -163,6 +163,7 @@ export function renderWidget(root: ShadowRoot, core: ChatWidgetCore): RenderHand
     bubble.hidden = state.isExpanded;
     bubble.style.left = `${state.position.x}px`;
     bubble.style.top = `${state.position.y}px`;
+    bubble.classList.toggle('notDraggable', !options.draggable);
     bubble.setAttribute('aria-expanded', String(state.isOpen));
     bubble.setAttribute('aria-label', state.isOpen ? 'Close chat' : 'Open chat');
 

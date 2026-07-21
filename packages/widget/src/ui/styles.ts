@@ -56,6 +56,11 @@ const CSS = /* css */ `
   transition: transform 0.15s ease, background 0.15s ease;
 }
 
+.bubble.notDraggable {
+  cursor: pointer;
+  touch-action: auto;
+}
+
 .bubble:hover {
   transform: scale(1.05);
   background: var(--chatling-primary-color-hover);

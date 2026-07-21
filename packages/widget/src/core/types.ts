@@ -14,6 +14,8 @@ export interface WidgetOptions {
   title?: string;
   placeholder?: string;
   theme?: 'light' | 'dark' | 'auto';
+  /** Whether the bubble can be dragged to reposition it. Default true. */
+  draggable?: boolean;
   initialMessages?: ChatMessage[];
   greetingMessage?: string;
   greetingDelayMs?: number;

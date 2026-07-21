@@ -120,6 +120,21 @@ describe('ChatWidgetCore drag-vs-click', () => {
   });
 });
 
+describe('ChatWidgetCore draggable: false', () => {
+  it('ignores pointer movement past the threshold and still treats release as a click', () => {
+    const core = new ChatWidgetCore({ workerUrl: 'https://example.com/chat', draggable: false });
+    const startPosition = core.getState().position;
+
+    core.onBubblePointerDown(100, 100);
+    core.onBubblePointerMove(100 + DRAG_THRESHOLD + 5, 100);
+    const wasClick = core.onBubblePointerUp();
+
+    expect(wasClick).toBe(true);
+    expect(core.getState().isOpen).toBe(true);
+    expect(core.getState().position).toEqual(startPosition);
+  });
+});
+
 describe('ChatWidgetCore expand/collapse', () => {
   it('only expands while open, and resets to collapsed on close', () => {
     const core = new ChatWidgetCore({ workerUrl: 'https://example.com/chat' });

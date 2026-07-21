@@ -6,6 +6,7 @@ const OBSERVED_ATTRS = [
   'title',
   'placeholder',
   'theme',
+  'bubble-draggable',
   'greeting-message',
   'greeting-delay-ms',
   'greeting-cooldown-ms',
@@ -13,17 +14,22 @@ const OBSERVED_ATTRS = [
 
 type ObservedAttr = (typeof OBSERVED_ATTRS)[number];
 
+// Named "bubble-draggable" rather than "draggable" to avoid colliding with
+// HTMLElement's own reflected "draggable" attribute (native drag-and-drop),
+// which is unrelated to repositioning the chat bubble.
 const ATTR_TO_OPTION: Record<ObservedAttr, keyof WidgetOptions> = {
   'worker-url': 'workerUrl',
   title: 'title',
   placeholder: 'placeholder',
   theme: 'theme',
+  'bubble-draggable': 'draggable',
   'greeting-message': 'greetingMessage',
   'greeting-delay-ms': 'greetingDelayMs',
   'greeting-cooldown-ms': 'greetingCooldownMs',
 };
 
 const NUMERIC_OPTIONS = new Set<keyof WidgetOptions>(['greetingDelayMs', 'greetingCooldownMs']);
+const BOOLEAN_OPTIONS = new Set<keyof WidgetOptions>(['draggable']);
 
 /**
  * Zero-integration embed for any framework: `<chatling-widget worker-url="...">`.
@@ -83,7 +89,9 @@ export class ChatlingElement extends HTMLElement {
     if (!optionKey) return;
     const value: unknown = NUMERIC_OPTIONS.has(optionKey)
       ? Number(newValue)
-      : (newValue ?? undefined);
+      : BOOLEAN_OPTIONS.has(optionKey)
+        ? newValue !== 'false'
+        : (newValue ?? undefined);
     this.instance.updateOptions({ [optionKey]: value } as Partial<WidgetOptions>);
   }
 
@@ -103,7 +111,9 @@ export class ChatlingElement extends HTMLElement {
       const optionKey = ATTR_TO_OPTION[attr];
       (options as Record<string, unknown>)[optionKey] = NUMERIC_OPTIONS.has(optionKey)
         ? Number(value)
-        : value;
+        : BOOLEAN_OPTIONS.has(optionKey)
+          ? value !== 'false'
+          : value;
     }
     return options;
   }
