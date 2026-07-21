@@ -131,3 +131,5 @@ npm install
 cp .env.example .env.local   # point VITE_AI_WORKER_URL at your local wrangler dev
 npm run dev
 ```
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) before opening a PR.
