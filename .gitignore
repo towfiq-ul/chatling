@@ -7,3 +7,9 @@ test-results/
 playwright-report/
 .DS_Store
 *.log
+
+# Claude Code planning/meta artifacts — not project files
+.claude/
+CLAUDE.md
+plan.md
+TODO.md
