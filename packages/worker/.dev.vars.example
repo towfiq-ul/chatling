@@ -1,0 +1,14 @@
+# Copy this file to .dev.vars (gitignored) and fill in real values for local `wrangler dev`.
+# In production these are set with `wrangler secret put <NAME>` — never committed, never passed as CLI args.
+
+# Upstream LLM provider API key. Never touches the browser.
+AI_API_KEY=
+
+# OpenAI-compatible chat completions base URL, e.g. https://openrouter.ai/api/v1
+AI_BASE_URL=https://openrouter.ai/api/v1
+
+# Model ID. Kept as a secret (not a source constant) so it can be swapped without a
+# redeploy-from-source — e.g. off a paid-tier model that starts returning 402s.
+# Verify a model is actually free-tier-accessible on your account before wiring it in
+# (query the provider's /models list and filter for the free suffix/flag).
+AI_MODEL=

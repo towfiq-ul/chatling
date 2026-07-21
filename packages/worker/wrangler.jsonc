@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ai-chat-assistant-widget-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "observability": {
+    "enabled": true
+  },
+  // Comma-separated list of exact origins allowed to call this Worker.
+  // NOT a security boundary by itself (Origin is spoofable by non-browser clients) —
+  // it only stops casual cross-site embedding. The rate limiter below is the real
+  // abuse control. Add both your production origin and your local dev origin here
+  // before deploying.
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:5173"
+  },
+  // Cloudflare-native per-IP rate limiting, keyed by CF-Connecting-IP.
+  // No external KV/Redis needed. Fails open if this binding is ever absent
+  // (e.g. a platform without it) rather than breaking the whole Worker.
+  "ratelimits": [
+    {
+      "name": "RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 20,
+        "period": 60
+      }
+    }
+  ],
+  // Bundles RULESET.md as a plain string import (no runtime fetch/FS access),
+  // so the persona/tone/behavior ruleset lives in one canonical .md file.
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.md"],
+      "fallthrough": true
+    }
+  ]
+}

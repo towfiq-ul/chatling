@@ -1,0 +1,52 @@
+{
+  "name": "ai-chat-assistant-widget",
+  "version": "0.1.0",
+  "description": "A floating AI chat assistant widget that embeds in any JS framework via a Custom Element or a framework-agnostic mount() function.",
+  "type": "module",
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/auto-register.js",
+    "./dist/auto-register.global.js",
+    "src/auto-register.ts"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./auto-register": {
+      "types": "./dist/auto-register.d.ts",
+      "import": "./dist/auto-register.js",
+      "default": "./dist/auto-register.global.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [
+    "chat-widget",
+    "ai-chat",
+    "customer-support",
+    "custom-element",
+    "web-component"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  }
+}

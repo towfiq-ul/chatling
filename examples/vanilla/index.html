@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ai-chat-assistant-widget — vanilla script-tag example</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 640px;
+        margin: 4rem auto;
+        padding: 0 1.5rem;
+        line-height: 1.6;
+        color: #1a1a1a;
+      }
+      code {
+        background: #f0f0f0;
+        padding: 0.15em 0.4em;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ai-chat-assistant-widget</h1>
+    <p>
+      This page embeds the widget with a plain <code>&lt;script&gt;</code> tag and zero build
+      step — the way a static site with no bundler would use it. The bubble should appear on the
+      right edge of the viewport, vertically centered.
+    </p>
+    <p>
+      By default this points at a local <code>wrangler dev</code> worker at
+      <code>http://localhost:8787</code>. Start it from <code>packages/worker</code> before
+      sending a message, or remove the <code>worker-url</code> attribute below to see the
+      "not configured" empty state.
+    </p>
+
+    <!--
+      Local dev references the built dist/ output directly (no publish step yet).
+      A real consumer would instead point at a CDN URL for the published package, e.g.
+      https://unpkg.com/ai-chat-assistant-widget/dist/auto-register.global.js
+    -->
+    <script src="../../packages/widget/dist/auto-register.global.js"></script>
+
+    <!--
+      greeting-delay-ms/greeting-cooldown-ms are shortened from the library
+      defaults (1200ms / 30min) so the greeting popup is observable quickly
+      both by a human looking at this demo and by the E2E suite.
+    -->
+    <ai-chat-widget
+      worker-url="http://localhost:8787"
+      title="Site Assistant"
+      placeholder="Ask a question…"
+      theme="auto"
+      greeting-message="Hi! 👋 Ask me anything."
+      greeting-delay-ms="500"
+      greeting-cooldown-ms="5000"
+    ></ai-chat-widget>
+  </body>
+</html>
