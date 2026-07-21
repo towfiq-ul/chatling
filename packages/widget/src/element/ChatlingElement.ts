@@ -26,12 +26,12 @@ const ATTR_TO_OPTION: Record<ObservedAttr, keyof WidgetOptions> = {
 const NUMERIC_OPTIONS = new Set<keyof WidgetOptions>(['greetingDelayMs', 'greetingCooldownMs']);
 
 /**
- * Zero-integration embed for any framework: `<ai-chat-widget worker-url="...">`.
+ * Zero-integration embed for any framework: `<chatling-widget worker-url="...">`.
  * Primitives are set as kebab-case attributes; callbacks and message arrays
  * are set as JS properties (`el.onMessage = ...`) since attributes can only
  * ever be strings.
  */
-export class AiChatWidgetElement extends HTMLElement {
+export class ChatlingElement extends HTMLElement {
   static get observedAttributes(): readonly string[] {
     return OBSERVED_ATTRS;
   }

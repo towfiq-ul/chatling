@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "ai-chat-assistant-widget-worker",
+  "name": "chatling-worker",
   "main": "src/index.ts",
   "compatibility_date": "2026-07-21",
   "observability": {

@@ -1,4 +1,4 @@
-import { mount, type WidgetOptions } from 'ai-chat-assistant-widget';
+import { mount, type WidgetOptions } from 'chatling';
 import { useEffect, useRef } from 'react';
 
 /**

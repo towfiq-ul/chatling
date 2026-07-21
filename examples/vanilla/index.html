@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ai-chat-assistant-widget — vanilla script-tag example</title>
+    <title>chatling — vanilla script-tag example</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -21,7 +21,7 @@
     </style>
   </head>
   <body>
-    <h1>ai-chat-assistant-widget</h1>
+    <h1>chatling</h1>
     <p>
       This page embeds the widget with a plain <code>&lt;script&gt;</code> tag and zero build
       step — the way a static site with no bundler would use it. The bubble should appear on the
@@ -37,7 +37,7 @@
     <!--
       Local dev references the built dist/ output directly (no publish step yet).
       A real consumer would instead point at a CDN URL for the published package, e.g.
-      https://unpkg.com/ai-chat-assistant-widget/dist/auto-register.global.js
+      https://unpkg.com/chatling/dist/auto-register.global.js
     -->
     <script src="../../packages/widget/dist/auto-register.global.js"></script>
 
@@ -46,7 +46,7 @@
       defaults (1200ms / 30min) so the greeting popup is observable quickly
       both by a human looking at this demo and by the E2E suite.
     -->
-    <ai-chat-widget
+    <chatling-widget
       worker-url="http://localhost:8787"
       title="Site Assistant"
       placeholder="Ask a question…"
@@ -54,6 +54,6 @@
       greeting-message="Hi! 👋 Ask me anything."
       greeting-delay-ms="500"
       greeting-cooldown-ms="5000"
-    ></ai-chat-widget>
+    ></chatling-widget>
   </body>
 </html>

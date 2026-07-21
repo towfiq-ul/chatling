@@ -158,7 +158,7 @@ describe('ChatWidgetCore.sendMessage', () => {
     expect(core.getState().isLoading).toBe(false);
     expect(onMessage).toHaveBeenCalledTimes(2);
 
-    const raw = window.localStorage.getItem('ai-chat-widget:messages');
+    const raw = window.localStorage.getItem('chatling:messages');
     expect(raw && JSON.parse(raw)).toEqual(core.getState().messages);
   });
 
@@ -208,13 +208,13 @@ describe('ChatWidgetCore greeting cooldown', () => {
 
     vi.advanceTimersByTime(1000);
     expect(core.getState().showGreeting).toBe(true);
-    expect(window.localStorage.getItem('ai-chat-widget:greeted-at')).toBe('0');
+    expect(window.localStorage.getItem('chatling:greeted-at')).toBe('0');
 
     core.destroy();
   });
 
   it('does not schedule a greeting while still inside the cooldown window', () => {
-    window.localStorage.setItem('ai-chat-widget:greeted-at', '500');
+    window.localStorage.setItem('chatling:greeted-at', '500');
     const core = new ChatWidgetCore(
       { workerUrl: 'https://example.com/chat', greetingDelayMs: 1000, greetingCooldownMs: 10_000 },
       { now: () => 1000 },
@@ -239,7 +239,7 @@ describe('ChatWidgetCore greeting cooldown', () => {
 
     core.dismissGreeting();
     expect(core.getState().showGreeting).toBe(false);
-    expect(window.localStorage.getItem('ai-chat-widget:greeted-at')).toBe('42');
+    expect(window.localStorage.getItem('chatling:greeted-at')).toBe('42');
 
     core.destroy();
   });

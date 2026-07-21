@@ -1,4 +1,4 @@
-# ai-chat-assistant-widget
+# chatling
 
 A floating AI chat assistant widget for static sites and SPAs — draggable, persists across
 navigation and reloads, answers only from content you provide, and never exposes your LLM
@@ -42,23 +42,23 @@ wrangler deploy                   # prints your Worker URL: https://<name>.<subd
 
 ### 2. Embed the widget
 
-**Zero-build, plain HTML** — a `<script>` tag registers `<ai-chat-widget>` as a Custom Element:
+**Zero-build, plain HTML** — a `<script>` tag registers `<chatling-widget>` as a Custom Element:
 
 ```html
-<script src="https://unpkg.com/ai-chat-assistant-widget/dist/auto-register.global.js"></script>
-<ai-chat-widget
+<script src="https://unpkg.com/chatling/dist/auto-register.global.js"></script>
+<chatling-widget
   worker-url="https://your-worker.your-subdomain.workers.dev"
   title="Site Assistant"
   placeholder="Ask a question…"
   theme="auto"
-></ai-chat-widget>
+></chatling-widget>
 ```
 
 **Any JS framework** — call `mount()` directly (needed for callbacks like `onMessage`, which
 can't be serialized as an HTML attribute):
 
 ```ts
-import { mount } from 'ai-chat-assistant-widget';
+import { mount } from 'chatling';
 
 const instance = mount(document.getElementById('chat-widget-root'), {
   workerUrl: 'https://your-worker.your-subdomain.workers.dev',

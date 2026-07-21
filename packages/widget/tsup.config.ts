@@ -12,7 +12,7 @@ export default defineConfig([
   {
     entry: { 'auto-register': 'src/auto-register.ts' },
     format: ['esm', 'iife'],
-    globalName: 'AiChatWidget',
+    globalName: 'Chatling',
     dts: true,
     sourcemap: true,
     minify: true,

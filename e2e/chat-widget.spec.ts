@@ -103,9 +103,7 @@ test.describe('greeting popup', () => {
     await expect(greeting).toBeVisible({ timeout: 1500 });
     await expect(greeting.locator('.greetingText')).toHaveText('Hi! 👋 Ask me anything.');
 
-    const greetedAt = await page.evaluate(() =>
-      window.localStorage.getItem('ai-chat-widget:greeted-at'),
-    );
+    const greetedAt = await page.evaluate(() => window.localStorage.getItem('chatling:greeted-at'));
     expect(greetedAt).toBeTruthy();
 
     await page.locator('.greetingClose').click();

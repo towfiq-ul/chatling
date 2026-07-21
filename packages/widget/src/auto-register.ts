@@ -1,7 +1,7 @@
-import { AiChatWidgetElement } from './element/AiChatWidgetElement.js';
+import { ChatlingElement } from './element/ChatlingElement.js';
 
-if (!customElements.get('ai-chat-widget')) {
-  customElements.define('ai-chat-widget', AiChatWidgetElement);
+if (!customElements.get('chatling-widget')) {
+  customElements.define('chatling-widget', ChatlingElement);
 }
 
-export { AiChatWidgetElement };
+export { ChatlingElement };

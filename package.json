@@ -1,5 +1,5 @@
 {
-  "name": "ai-chat-assistant-widget-monorepo",
+  "name": "chatling-monorepo",
   "private": true,
   "type": "module",
   "workspaces": [

@@ -1,6 +1,6 @@
 import type { ChatMessage, Position } from './types.js';
 
-const NAMESPACE = 'ai-chat-widget';
+const NAMESPACE = 'chatling';
 
 export const STORAGE_KEYS = {
   messages: `${NAMESPACE}:messages`,
