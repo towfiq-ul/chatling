@@ -1,6 +1,6 @@
 {
   "name": "chatling",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A floating AI chat assistant widget that embeds in any JS framework via a Custom Element or a framework-agnostic mount() function.",
   "type": "module",
   "license": "MIT",
