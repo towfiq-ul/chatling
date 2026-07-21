@@ -65,15 +65,17 @@ export interface WidgetOptions {
   title?: string;
   placeholder?: string;
   theme?: 'light' | 'dark' | 'auto';
-  model?: string;
   initialMessages?: ChatMessage[];
   greetingMessage?: string;        // new — greeting popup copy
   greetingDelayMs?: number;        // new — default 1200
   greetingCooldownMs?: number;     // new — default 1_800_000 (30 min)
+  unconfiguredMessage?: string;
   onMessage?: (message: ChatMessage) => void;
   onError?: (error: Error) => void;
 }
 ```
+
+**Post-implementation correction**: there's no `model` field anywhere client-side (not in `WidgetOptions`, not sent by the fetch wrapper, not an attribute on `<ai-chat-widget>`). An earlier draft of this plan had one, but PRD §4.8 is explicit that the client never sends a model name — "no model name... a deliberate trust boundary, not an oversight." Which model is used is entirely the Worker's decision (`AI_MODEL` secret). `sanitize.ts`'s field whitelist accepts no `model` field either.
 
 ## Worker: contract and security (from PRD §5)
 
@@ -113,6 +115,7 @@ ai-chat-assistant-widget/
 ├── CLAUDE.md                    # written last
 ├── PRD.md                       # already exists — source of truth, unchanged by this plan
 ├── plan.md                      # this file
+├── playwright.config.ts         # not in the original draft of this layout — 4 webServers (stub upstream, wrangler dev, static vanilla example, React dev server)
 ├── examples/
 │   ├── vanilla/index.html       # <script> tag embed smoke test
 │   └── react/                   # small Vite+React app using mount() in useEffect, mounted outside router switch
@@ -142,29 +145,32 @@ ai-chat-assistant-widget/
 │       ├── tsconfig.json
 │       ├── wrangler.jsonc       # name, main, compatibility_date, vars.ALLOWED_ORIGINS, [[ratelimits]], rules (Text import), observability
 │       ├── .dev.vars.example    # template for local secrets (gitignored: .dev.vars)
-│       ├── vitest.config.ts     # defineWorkersConfig, configPath -> wrangler.jsonc
+│       ├── vitest.config.ts     # cloudflareTest plugin (defineWorkersConfig was removed from the installed @cloudflare/vitest-pool-workers version — see Testing notes below), configPath -> wrangler.jsonc
 │       └── src/
 │           ├── index.ts         # request handling per the flow above
 │           ├── RULESET.md       # persona/tone/behavior — imported as text into context.ts
 │           ├── context.ts       # imports RULESET.md, defines SITE_CONTEXT (consumer-edited), exports SYSTEM_CONTEXT
+│           ├── md.d.ts          # ambient `declare module '*.md'` so context.ts's RULESET.md import type-checks — not called out in the original draft, a natural consequence of the Text-import rule
 │           ├── cors.ts          # origin allowlist + CORS headers
 │           └── sanitize.ts      # field whitelist, role whitelist, value clamping, size/count caps
 └── e2e/
-    └── chat-widget.spec.ts      # Playwright: bubble click, drag-vs-click, send/receive, persistence, expand/collapse, greeting cooldown, cross-page mount
+    ├── chat-widget.spec.ts             # Playwright: bubble click, drag-vs-click, send/receive, persistence, expand/collapse, greeting cooldown
+    ├── cross-page-persistence.spec.ts  # separate file, not folded into chat-widget.spec.ts — targets the React dev server, not the static vanilla example
+    └── stub-upstream-server.mjs        # minimal OpenAI-compatible /chat/completions stand-in so the full round trip is testable offline/deterministically without a real provider API key
 ```
 
 ## Testing approach (PRD §7 — E2E is primary, not supplementary)
 
-1. Unit tests (Vitest): `ChatWidgetCore` (state transitions, drag threshold math, default-position formula, panel placement, expand/collapse state, greeting cooldown logic with a mocked clock/localStorage), `storage.ts` (corrupt/missing localStorage safe defaults), Worker `sanitize.ts`/`cors.ts` (whitelisting, role stripping, clamping), `context.ts` (RULESET + SITE_CONTEXT concatenation) as pure functions. 1-2 `@cloudflare/vitest-pool-workers` `SELF.fetch()` integration tests for the actual `/chat` route.
+1. Unit tests (Vitest): `ChatWidgetCore` (state transitions, drag threshold math, default-position formula, panel placement, expand/collapse state, greeting cooldown logic with an injected clock/localStorage), `storage.ts` (corrupt/missing localStorage safe defaults), Worker `sanitize.ts`/`cors.ts` (whitelisting, role stripping, clamping), `context.ts` (RULESET + SITE_CONTEXT concatenation) as pure functions. 5 `@cloudflare/vitest-pool-workers` `SELF.fetch()` integration tests for the actual `/chat` route, scoped to paths that short-circuit before the upstream call (origin/method/JSON-shape/role-whitelist rejection) — the installed `@cloudflare/vitest-pool-workers` version (0.18.x) does not export `fetchMock` from `cloudflare:test` the way older docs describe, so upstream-passthrough coverage lives in the Playwright suite instead, against `e2e/stub-upstream-server.mjs`.
 2. **Playwright E2E against a running `wrangler dev` + the vanilla example page** (PRD's explicit lesson: type-checking/build don't prove the feature works):
    - Click the bubble opens the panel; synthetic pointerdown/up with no movement also opens it; pointerdown+move+up past the threshold repositions without opening.
-   - Type and send a real message; attach response/console listeners *before* sending so the actual Worker HTTP status/body is visible in test output, not a generic UI error.
+   - Type and send a real message against `e2e/stub-upstream-server.mjs` (a minimal OpenAI-compatible stand-in, since this environment has no real provider API key) — attach response/console listeners *before* sending so the actual Worker HTTP status/body is visible in test output, not a generic UI error.
    - Assert the rendered response reflects grounded content from a test `SITE_CONTEXT`.
    - Assert the typing indicator (dots wrapper, `aria-label="Assistant is thinking"`) is present while awaiting a response and gone after.
    - Toggle expand/collapse: assert zero `framenavigated` events fire across the cycle, and message DOM content is byte-identical before/after.
-   - Greeting popup: with a mocked/fast-forwarded clock, assert it appears once after the delay, does not reappear immediately after dismissal, and does reappear after the cooldown window with a fresh mocked timestamp — specifically covering the "written at show-time not dismiss-time" ordering bug from PRD §4.11.
+   - Greeting popup: using **real, shortened timers** on the example page (`greeting-delay-ms="500"`, `greeting-cooldown-ms="5000"`, not a mocked clock — simpler and avoids Playwright clock/timer interaction edge cases), assert it appears once after the delay, does not reappear immediately after dismissal within the cooldown, and does reappear once the cooldown window elapses — specifically covering the "written at show-time not dismiss-time" ordering bug from PRD §4.11.
    - Reload the page: assert messages and bubble position persisted from localStorage.
-   - In the React example: open the chat, trigger a route change, assert the widget is still open with the same messages (proves "mount outside the swapped subtree" works for this package).
+   - In the React example (a separate spec file, `e2e/cross-page-persistence.spec.ts`, since it targets the React dev server not the static vanilla example): open the chat, trigger a route change, assert the widget is still open with the same messages (proves "mount outside the swapped subtree" works for this package).
 
 ## Skills to load during implementation
 
@@ -190,12 +196,21 @@ ai-chat-assistant-widget/
 13. Verify: `npm install` → `npm run build` → `npm run typecheck` → `npm run lint` → `npm test` all pass. `wrangler dev` in `packages/worker`, then run the Playwright suite against it and manually confirm a message round-trips, the typing indicator shows, expand/collapse works, and the greeting popup appears once.
 14. `git add -A && git commit` — describes the initial scaffold, authored by the existing global git identity, **no `Co-Authored-By` trailer**.
 
+**Verification results (step 13, actually run)**: `npm install`, `npm run build`, `npm run typecheck`, `npm run lint`, `npm test` (59 unit tests) all pass; the full Playwright suite (7 specs) passes against a real `wrangler dev`. Two real bugs surfaced and were fixed during this pass, not caught by unit tests or type-checking — exactly the PRD §7 lesson this plan's testing philosophy is built around:
+- **`[hidden]` had no effect** on `.bubble`/`.panel`/`.greeting`/`.typingIndicator` — each sets `display: flex` for its visible state, which beats the UA stylesheet's `[hidden] { display: none }` once an author stylesheet touches `display` on the same element. Fixed with an explicit `[hidden] { display: none !important }` rule in `ui/styles.ts`.
+- **`ALLOWED_ORIGINS`** (`http://localhost:5173`, the React example's port) didn't cover the vanilla example's static-server port (`4173`), so every send from the vanilla example silently 403'd. The E2E `wrangler dev` command now passes `--var ALLOWED_ORIGINS:http://localhost:4173,http://localhost:5173` to cover both.
+- Also caught in review (not by a test): the README's original "serve `examples/vanilla` directly" instruction would have broken the page's `../../packages/widget/dist` relative path — corrected to serve from the repo root.
+
+Committed as `efd71cc` on `main`.
+
 ### Critical files
 - `packages/widget/src/core/ChatWidgetCore.ts` (drag-vs-click, position/panel math, expand/collapse, greeting cooldown, persistence)
 - `packages/widget/src/element/AiChatWidgetElement.ts`
+- `packages/widget/src/ui/styles.ts` (incl. the `[hidden]` cascade fix found via E2E)
 - `packages/worker/src/index.ts` (full security/request flow)
 - `packages/worker/src/sanitize.ts` (role whitelist — the most important single control per PRD §5.3)
 - `packages/worker/src/RULESET.md` + `packages/worker/src/context.ts` (persona/data split)
 - `packages/worker/wrangler.jsonc` (rate-limit binding + text-import rule)
-- `e2e/chat-widget.spec.ts`
+- `playwright.config.ts` (4 webServers, incl. `ALLOWED_ORIGINS` override for the test env)
+- `e2e/chat-widget.spec.ts`, `e2e/cross-page-persistence.spec.ts`, `e2e/stub-upstream-server.mjs`
 - `CLAUDE.md` (final step)

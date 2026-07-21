@@ -94,6 +94,12 @@ npm workspaces monorepo (`workspaces: ["packages/*"]`), two packages:
 Each of these fixes a real bug or bad UX that was already tried and rejected — worth reading
 `PRD.md`'s relevant section before "simplifying" any of them away:
 
+- **`[hidden] { display: none !important }` in `ui/styles.ts`** — every hidden-toggled element
+  (`.bubble`, `.panel`, `.greeting`, `.typingIndicator`) also sets `display: flex` for its visible
+  state, which otherwise beats the browser's default `[hidden] { display: none }` UA rule once an
+  author stylesheet touches `display` on the same element (author styles win over UA styles
+  regardless of selector specificity). Without this override, setting `.hidden = true` on any of
+  these does nothing visually — found via Playwright E2E, not by a unit test or type-check.
 - **Role whitelist in `sanitize.ts`** — only `user`/`assistant` are ever accepted from the client.
 - **Drag vs. click** (`ChatWidgetCore.onBubblePointer{Down,Move,Up}`) uses a pixel threshold
   (`DRAG_THRESHOLD = 6`) and Pointer Events, not a time threshold or separate mouse/touch handlers.
