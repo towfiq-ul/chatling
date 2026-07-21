@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root + worker + widget dependencies
+        run: npm ci
+
+      - name: Install React example dependencies
+        # Not an npm workspace member (deliberately mirrors a real consumer
+        # installing chatling standalone) — needs its own install.
+        run: npm ci
+        working-directory: examples/react
+
+      - name: Build
+        run: npm run build
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E tests
+        # No secrets needed: unit tests use deterministic bindings hardcoded
+        # in packages/worker/vitest.config.ts, and playwright.config.ts
+        # points the Worker at e2e/stub-upstream-server.mjs via --var
+        # overrides instead of any real provider.
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

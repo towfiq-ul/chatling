@@ -8,7 +8,11 @@ const REACT_EXAMPLE_PORT = 5173;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
-  reporter: 'list',
+  // CI gets a retry (so `trace: 'on-first-retry'` below actually has a
+  // first retry to capture) and an HTML report worth uploading as an
+  // artifact on failure; local runs stay fast with console-only output.
+  retries: process.env.CI ? 2 : 0,
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${STATIC_PORT}`,
     trace: 'on-first-retry',
